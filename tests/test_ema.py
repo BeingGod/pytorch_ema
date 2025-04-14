@@ -1,4 +1,7 @@
+import os
+
 import paddle
+import numpy as np
 import pytest
 
 from torch_ema import ExponentialMovingAverage
@@ -15,6 +18,10 @@ def test_val_error(decay, use_num_updates, explicit_params):
     x_val = paddle.rand(shape=(100, 10))
     y_val = paddle.rand(shape=[100]).round().astype(dtype="int64")
     model = paddle.nn.Linear(in_features=10, out_features=2)
+
+    ckpt = np.load(os.path.join(os.path.dirname(__file__),'checkpoint.npy'))
+    model.weight.set_value(ckpt.T)   
+
     optimizer = paddle.optimizer.Adam(
         parameters=model.parameters(), learning_rate=0.01, weight_decay=0.0
     )
@@ -69,6 +76,10 @@ def test_contextmanager(explicit_params):
     x_val = paddle.rand(shape=(100, 10))
     y_val = paddle.rand(shape=[100]).round().astype(dtype="int64")
     model = paddle.nn.Linear(in_features=10, out_features=2)
+
+    ckpt = np.load(os.path.join(os.path.dirname(__file__),'checkpoint.npy'))
+    model.weight.set_value(ckpt.T)   
+
     optimizer = paddle.optimizer.Adam(
         parameters=model.parameters(), learning_rate=0.01, weight_decay=0.0
     )

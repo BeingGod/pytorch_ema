@@ -120,7 +120,6 @@ class ExponentialMovingAverage:
         parameters = self._get_parameters(parameters)
         for s_param, param in zip(self.shadow_params, parameters):
             paddle.assign(s_param, param)
-            # param.data.copy_(s_param.data)
 
     def store(
         self,
@@ -164,7 +163,7 @@ class ExponentialMovingAverage:
             )
         parameters = self._get_parameters(parameters)
         for c_param, param in zip(self.collected_params, parameters):
-            param.data.copy_(c_param.data)
+            paddle.assign(c_param, param)
 
     @contextlib.contextmanager
     def average_parameters(

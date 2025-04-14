@@ -9,21 +9,19 @@ version = version_dict["__version__"]
 del version_dict
 
 url = 'https://github.com/fadel/pytorch_ema'
-download_url = '{}/archive/{}.tar.gz'.format(url, version)
 
-install_requires = ["torch"]
+install_requires = ["paddlepaddle-gpu"]
 setup_requires = []
 tests_require = []
 
 setup(
     name='torch_ema',
     version=version,
-    description='PyTorch library for computing moving averages of model parameters.',
-    author='Samuel G. Fadel',
-    author_email='samuelfadel@gmail.com',
+    description='PaddlePaddle library for computing moving averages of model parameters.',
+    author='Ruibin Cheung',
+    author_email='beinggod@foxmail.com',
     url=url,
-    download_url=download_url,
-    keywords=['pytorch', 'parameters', 'deep-learning'],
+    keywords=['paddlepaddle', 'parameters', 'deep-learning'],
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,

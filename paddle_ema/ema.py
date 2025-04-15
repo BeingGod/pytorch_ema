@@ -13,7 +13,7 @@ class ExponentialMovingAverage:
     Maintains (exponential) moving average of a set of parameters.
 
     Args:
-        parameters: Iterable of `torch.nn.Parameter` (typically from
+        parameters: Iterable of `paddle.Tensor` (typically from
             `model.parameters()`).
             Note that EMA is computed on *all* provided parameters,
             regardless of whether or not they have `requires_grad = True`;
@@ -38,7 +38,7 @@ class ExponentialMovingAverage:
 
     def __init__(
         self,
-        parameters: Iterable[paddle.base.framework.EagerParamBase.from_tensor],
+        parameters: Iterable[paddle.Tensor],
         decay: float,
         use_num_updates: bool = True,
     ):
@@ -54,9 +54,9 @@ class ExponentialMovingAverage:
     def _get_parameters(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ],
-    ) -> Iterable[paddle.base.framework.EagerParamBase.from_tensor]:
+    ) -> Iterable[paddle.Tensor]:
         if parameters is None:
             parameters = [p() for p in self._params_refs]
             if any(p is None for p in parameters):
@@ -75,7 +75,7 @@ class ExponentialMovingAverage:
     def update(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ] = None,
     ) -> None:
         """
@@ -85,7 +85,7 @@ class ExponentialMovingAverage:
         the `optimizer.step()` call.
 
         Args:
-            parameters: Iterable of `torch.nn.Parameter`; usually the same set of
+            parameters: Iterable of `paddle.Tensor`; usually the same set of
                 parameters used to initialize this object. If `None`, the
                 parameters with which this `ExponentialMovingAverage` was
                 initialized will be used.
@@ -99,39 +99,39 @@ class ExponentialMovingAverage:
         with paddle.no_grad():
             for s_param, param in zip(self.shadow_params, parameters):
                 tmp = s_param - param
-                tmp.multiply_(y=paddle.to_tensor(one_minus_decay))
-                s_param.subtract_(y=paddle.to_tensor(tmp))
+                tmp.multiply_(y=paddle.full([],fill_value=one_minus_decay))
+                s_param.subtract_(y=tmp)
 
     def copy_to(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ] = None,
     ) -> None:
         """
         Copy current averaged parameters into given collection of parameters.
 
         Args:
-            parameters: Iterable of `torch.nn.Parameter`; the parameters to be
+            parameters: Iterable of `paddle.Tensor`; the parameters to be
                 updated with the stored moving averages. If `None`, the
                 parameters with which this `ExponentialMovingAverage` was
                 initialized will be used.
         """
         parameters = self._get_parameters(parameters)
         for s_param, param in zip(self.shadow_params, parameters):
-            param.data.copy_(s_param.data)
+            paddle.assign(s_param, param)
 
     def store(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ] = None,
     ) -> None:
         """
         Save the current parameters for restoring later.
 
         Args:
-            parameters: Iterable of `torch.nn.Parameter`; the parameters to be
+            parameters: Iterable of `paddle.Tensor`; the parameters to be
                 temporarily stored. If `None`, the parameters of with which this
                 `ExponentialMovingAverage` was initialized will be used.
         """
@@ -141,7 +141,7 @@ class ExponentialMovingAverage:
     def restore(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ] = None,
     ) -> None:
         """
@@ -152,7 +152,7 @@ class ExponentialMovingAverage:
         restore the former parameters.
 
         Args:
-            parameters: Iterable of `torch.nn.Parameter`; the parameters to be
+            parameters: Iterable of `paddle.Tensor`; the parameters to be
                 updated with the stored parameters. If `None`, the
                 parameters with which this `ExponentialMovingAverage` was
                 initialized will be used.
@@ -163,13 +163,13 @@ class ExponentialMovingAverage:
             )
         parameters = self._get_parameters(parameters)
         for c_param, param in zip(self.collected_params, parameters):
-            param.data.copy_(c_param.data)
+            paddle.assign(c_param, param)
 
     @contextlib.contextmanager
     def average_parameters(
         self,
         parameters: Optional[
-            Iterable[paddle.base.framework.EagerParamBase.from_tensor]
+            Iterable[paddle.Tensor]
         ] = None,
     ):
         """
@@ -185,7 +185,7 @@ class ExponentialMovingAverage:
                 ema.restore()
 
         Args:
-            parameters: Iterable of `torch.nn.Parameter`; the parameters to be
+            parameters: Iterable of `paddle.Tensor`; the parameters to be
                 updated with the stored parameters. If `None`, the
                 parameters with which this `ExponentialMovingAverage` was
                 initialized will be used.

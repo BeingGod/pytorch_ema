@@ -3,7 +3,7 @@ import copy
 import paddle
 import pytest
 
-from torch_ema import ExponentialMovingAverage
+from paddle_ema import ExponentialMovingAverage
 
 
 @pytest.mark.parametrize("decay", [0.995])
